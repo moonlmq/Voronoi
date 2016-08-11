@@ -7,5 +7,4 @@ Voronoi需求v20160810
 实现
 1）给定若干个数据点，在坐标系给定范围内画出voronoi图（Delauany 三角网）
 流程
-![image]
-(https://github.com/moonlmq/Voronoi/tree/master/image/process1.png)
+![specificity](image/process1.png)
