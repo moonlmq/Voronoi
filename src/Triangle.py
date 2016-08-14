@@ -59,3 +59,46 @@ class Triangle:
 			return True
 		else:
 			return False
+
+
+MAXSIZE = 15000
+#获得Delaunay三角形
+def getDelaunay(ptlist):
+	trianglelist = [None]*MAXSIZE
+	complete = [False]*MAXSIZE
+	for i in range(MAXSIZE):
+		complete.append(False)
+	edgeslist = [[None]*MAXSIZE for row in xrange(2)]
+
+	#构建超级三角形（包含所有点）
+	xmin = ptlist[0].x
+	ymin = ptlist[0].y
+
+	xmax = xmin
+	ymax = ymin
+
+	ptnum = len(ptlist)
+	for i in xrange(1,ptnum):
+		if ptlist[i].x < xmin:
+			xmin = ptlist[i].x
+		if ptlist[i].x >xmax:
+			xmax = ptlist[i].x
+		if ptlist[i].y < ymin:
+			ymin = ptlist[i].y
+		if ptlist[i].y> ymax:
+			ymax = ptlist[i].y
+
+	dx = xmax - xmin
+	dy = ymax - ymin
+	if dx > dy:
+		dmax = dx
+	else:
+		dmax = dy
+	xmid = (xmax + xmin)/2
+	ymid = (ymax + ymin)/2
+
+	newpt = Point(xmid - 2*dmax,ymid-dmax)
+	ptlist.append(newpt)
+	newpt = Point(xmid, ymid+2*dmax)
+	ptlist.append(newpt)
+	newpt = Point(xmid+2*dmax,)
