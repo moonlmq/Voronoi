@@ -101,4 +101,72 @@ def getDelaunay(ptlist):
 	ptlist.append(newpt)
 	newpt = Point(xmid, ymid+2*dmax)
 	ptlist.append(newpt)
-	newpt = Point(xmid+2*dmax,)
+	newpt = Point(xmid+2*dmax,ymid - dmax)
+	ptlist.append(newpt)
+
+	#寻找Delaunay三角形
+	triangle = Triangle(ptlist[ptnum],ptlist[ptnum+1],ptlist[ptnum+2])
+	trianglelist[0] = triangle
+	complete[0] = False
+
+	ntri = 0
+
+	for i in range(ptnum):
+		#不断插入新节点
+		nedge = -1
+		j = -1
+		while j < ntri:
+			#判断在哪一个三角形外接圆里面
+			j += 1
+			if not complete[j] and trianglelist[j]:
+				inc = trianglelist[j].inCircle(ptlist[i])
+				if inc:
+					edgeslist[0][nedge+1] = trianglelist[j].v1
+					edgeslist[1][nedge+1] = trianglelist[j].v2
+					edgeslist[0][nedge+2] = trianglelist[j].v2
+					edgeslist[1][nedge+2] = trianglelist[j].v3
+					edgeslist[0][nedge+3] = trianglelist[j].v3
+					edgeslist[1][nedge+3] = trianglelist[j].v1
+					nedge += 3
+					trianglelist[j] = trianglelist[ntri]
+					complete[j] = complete[ntri]
+
+					j - = 1
+					ntri -= 1
+
+
+		#同时处于对于一个三角形外接圆里面，那么就把公共边删掉
+		for j in range(nedge):
+			if edgeslist[0][j] and edgeslist[1][j]:
+				for k in range(j+1,nedge+1):
+					if edgeslist[0][k] and edgeslist[1][k]:
+						if edgeslist[0][j] == edgeslist[1][k]:
+							if edgeslist[1][j] == edgeslist[0][k]:
+								edgeslist[0][j] = None
+								edgeslist[0][k] = None
+								edgeslist[1][j] = None
+								edgeslist[1][k] = None
+		
+		for j in range(nedge+1):
+			if edgeslist[0][j] and edgeslist[1][j]:
+				ntri += 1
+				trianglelist[ntri] = Triangle(edgeslist[0][j],edgeslist[1][j],ptlist[i])
+				complete[ntri] = False
+	#将新生成的三角形放入list
+	i = -1
+	while i< ntri:
+		i += 1
+		if trianglelist[i]:
+			if not (trianglelist[i].v1 in ptlist[0:ptnum] and trianglelist[i].v2 in ptlist[0:ptnum] \
+				and trianglelist[i].v3 in ptlist[0:ptnum]):
+				trianglelist[i] = trianglelist[ntri]
+				i -= 1
+				ntri -= 1
+				print i
+		else:
+			trianglelist[i] = trianglelist[ntri]
+			i -= 1
+			ntri -= 1
+	return trianglelist[:ntri+1]
+
+
