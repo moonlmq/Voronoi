@@ -4,6 +4,7 @@
 """
 import math
 import numpy as np
+import random
 
 #定义点
 class Point:
@@ -17,6 +18,8 @@ class Triangle:
 		self.v1 = v1
 		self.v2 = v2
 		self.v3 = v3
+		# self.center = None
+		self.getCenterAndRadius()
 
 	#获得三角形顶点
 	def getVertices(self):
@@ -29,18 +32,38 @@ class Triangle:
 		v3 = self.v3
 
 		#计算三角形两条边的垂直平分线斜率
-		m1 = -(v1.x-v2.x)/(v1.y-v2.y)
-		m2 = -(v2.x-v3.x)/(v2.y-v3.y)
-		#垂直平分点
-		x1 = (v1.x+v2.x)/2
-		y1 = (v1.y+v2.y)/2
-		x2 = (v2.x+v3.x)/2
-		y2 = (v2.y+v3.y)/2
-		#求圆心坐标
-		xc = (m1x1-m2x2+y2-y1)/(m1-m2)
-		yc = m1*xc+y1-m1*x1
+		eps = 0.000001
+		if abs(v1.y - v2.y)<eps and abs(v2.y -v3.y) <eps:
+			return None
+		if abs(v2.y-v1.y)<eps:
+			m2 = -(v3.x - v2.x) / float(v3.y - v2.y)
+			mx2 = (v2.x + v3.x) / 2.
+			my2 = (v2.y + v3.y) / 2.
+			xc = (v2.x+v1.x) / 2.
+			yc = m2*(xc - mx2) + my2
+		elif abs(v3.y - v2.y) < eps:
+			m1 = -(v2.x - v1.x) / float(v2.y - v1.y)
+			mx1 = (v1.x + v2.x) / 2.
+			my1 = (v1.y + v2.y) / 2.
+			xc = (v3.x + v2.x) / 2.
+			yc = m1 * (xc - mx1) + my1
+		else:
+			m1 = -(v1.x-v2.x)/float(v1.y-v2.y)
+			m2 = -(v2.x-v3.x)/float(v2.y-v3.y)
+			#垂直平分点
+			x1 = (v1.x+v2.x)/2
+			y1 = (v1.y+v2.y)/2
+			x2 = (v2.x+v3.x)/2
+			y2 = (v2.y+v3.y)/2
+			#求圆心坐标
+			if (m1-m2) == 0:
+				return None
+			else:
+				xc = (m1*x1-m2*x2+y2-y1)/float(m1-m2)
+				yc = m1*xc+y1-m1*x1
 
 		self.center = Point(xc,yc)
+		
 		#求半径
 		dx = (v1.x-xc)*(v1.x-xc)
 		dy = (v1.y-yc)*(v1.y-yc)
@@ -52,9 +75,9 @@ class Triangle:
 		dy = (v.y-self.center.y)*(v.y-self.center.y)
 		d = math.sqrt(dx+dy)
 
-		rx = (v1.x-self.center.x)*(v1.x-self.center.x)
-		ry = (v1.y-self.center.y)*(v1.y-self.center.y)
-		r = math.sqrt(rx,ry)
+		rx = (self.v1.x-self.center.x)*(self.v1.x-self.center.x)
+		ry = (self.v1.y-self.center.y)*(self.v1.y-self.center.y)
+		r = math.sqrt(rx+ry)
 		if r >= d:
 			return True
 		else:
@@ -119,6 +142,8 @@ def getDelaunay(ptlist):
 			#判断在哪一个三角形外接圆里面
 			j += 1
 			if not complete[j] and trianglelist[j]:
+				# print "trianglelist"
+				# print trianglelist[j]
 				inc = trianglelist[j].inCircle(ptlist[i])
 				if inc:
 					edgeslist[0][nedge+1] = trianglelist[j].v1
@@ -131,7 +156,7 @@ def getDelaunay(ptlist):
 					trianglelist[j] = trianglelist[ntri]
 					complete[j] = complete[ntri]
 
-					j - = 1
+					j -= 1
 					ntri -= 1
 
 
@@ -162,11 +187,21 @@ def getDelaunay(ptlist):
 				trianglelist[i] = trianglelist[ntri]
 				i -= 1
 				ntri -= 1
-				print i
+				# print i
 		else:
 			trianglelist[i] = trianglelist[ntri]
 			i -= 1
 			ntri -= 1
 	return trianglelist[:ntri+1]
 
+ptlist = []
 
+for i in range(10):
+	x= random.randrange(0,10)
+	y = random.randrange(10,20)
+	ptlist.append(Point(x,y))
+for item in ptlist:
+	print item.x,item.y
+
+trianglelist = getDelaunay(ptlist)
+print trianglelist
